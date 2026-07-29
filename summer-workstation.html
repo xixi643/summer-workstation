@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>五升六 · 暑假工作台</title>
+<!-- PWA 图标 & 配置 -->
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#166534">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="暑假工作台">
+<style>
+:root {
+  --g50: #f0fdf4; --g100: #dcfce7; --g200: #bbf7d0; --g300: #86efac;
+  --g400: #4ade80; --g500: #22c55e; --g600: #16a34a; --g700: #15803d;
+  --g800: #166534; --g900: #14532d;
+  --bg: #f0fdf4; --card: #fff; --text: #1a2e1a; --tl: #6b7280;
+  --border: #dcfce7; --shadow: 0 1px 3px rgba(0,0,0,0.05);
+  --radius: 12px; --nav-w: 68px;
+  --safe-b: env(safe-area-inset-bottom, 10px);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  background:var(--bg);color:var(--text);display:flex;min-height:100vh;
+  -webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;
+}
+/* 左侧导航 */
+nav{
+  position:fixed;left:0;top:0;bottom:0;width:var(--nav-w);
+  background:linear-gradient(180deg,var(--g800),var(--g900));
+  display:flex;flex-direction:column;align-items:center;
+  padding:14px 0;z-index:100;gap:3px;
+}
+nav .logo{
+  width:38px;height:38px;background:var(--g400);border-radius:11px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;font-weight:800;color:var(--g900);margin-bottom:10px;flex-shrink:0;
+}
+nav .nav-items{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;
+  overflow-y:auto;-webkit-overflow-scrolling:touch;padding:2px 0;
+}
+nav .nav-item{
+  width:50px;height:50px;border-radius:13px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:1px;cursor:pointer;transition:all .15s;color:var(--g300);
+  font-size:10px;flex-shrink:0;position:relative;
+}
+nav .nav-item .ic{font-size:20px;line-height:1}
+nav .nav-item.active{background:var(--g700);color:#fff}
+nav .nav-item:active{transform:scale(.9)}
+nav .nav-add{
+  width:40px;height:40px;border-radius:50%;background:var(--g500);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:22px;
+  cursor:pointer;flex-shrink:0;margin-top:auto;transition:all .15s;
+}
+nav .nav-add:active{transform:scale(.88);background:var(--g400)}
+/* 主区域 */
+main{
+  margin-left:var(--nav-w);flex:1;padding:14px;
+  padding-bottom:calc(76px + var(--safe-b));max-width:500px;width:100%;
+}
+/* 顶部 */
+.header{
+  display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;
+}
+.header .greeting{font-size:17px;font-weight:700}
+.header .score-badge{
+  background:var(--g500);color:#fff;padding:5px 12px;border-radius:18px;
+  font-size:12px;font-weight:600;display:flex;align-items:center;gap:3px;
+}
+/* 分类标题 */
+.sec-tit{
+  font-size:13px;font-weight:700;color:var(--g700);margin:14px 0 7px;
+  display:flex;align-items:center;gap:5px;
+}
+.sec-tit::before{content:'';width:3px;height:14px;background:var(--g500);border-radius:2px}
+/* 任务卡片 */
+.task-card{
+  background:var(--card);border-radius:var(--radius);padding:11px 12px;
+  margin-bottom:6px;box-shadow:var(--shadow);
+  display:flex;align-items:center;gap:10px;transition:all .15s;
+  border:1.5px solid transparent;
+}
+.task-card.done{background:var(--g50);border-color:var(--g200);opacity:.75}
+.task-card .check{
+  width:24px;height:24px;border-radius:50%;border:2px solid var(--g300);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  flex-shrink:0;transition:all .15s;font-size:13px;color:transparent;
+}
+.task-card.done .check{background:var(--g500);border-color:var(--g500);color:#fff}
+.task-card .task-info{flex:1;min-width:0}
+.task-card .task-name{font-size:13px;font-weight:600}
+.task-card.done .task-name{text-decoration:line-through;color:var(--tl)}
+.task-card .task-meta{font-size:10px;color:var(--tl);margin-top:1px}
+.task-card .task-pts{
+  font-size:10px;font-weight:600;color:var(--g600);background:var(--g100);
+  padding:2px 7px;border-radius:9px;white-space:nowrap;flex-shrink:0;
+}
+.task-card .task-del{
+  width:26px;height:26px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;color:#ef4444;cursor:pointer;flex-shrink:0;
+  opacity:0;transition:all .15s;
+}
+.task-card:active .task-del{opacity:1}
+/* 奖励卡片 */
+.reward-card{
+  background:var(--card);border-radius:var(--radius);padding:11px 12px;
+  margin-bottom:6px;box-shadow:var(--shadow);
+  display:flex;align-items:center;gap:10px;cursor:pointer;transition:all .15s;
+  border:1.5px solid transparent;
+}
+.reward-card:active{transform:scale(.97)}
+.reward-card.affordable{border-color:var(--g300)}
+.reward-card.locked{opacity:.45}
+.reward-card .r-icon{font-size:26px;flex-shrink:0}
+.reward-card .r-info{flex:1}
+.reward-card .r-name{font-size:13px;font-weight:600}
+.reward-card .r-cost{font-size:11px;color:var(--g600);font-weight:600}
+.reward-card .r-btn{
+  padding:5px 12px;border-radius:14px;font-size:11px;font-weight:600;
+  border:none;cursor:pointer;transition:all .15s;flex-shrink:0;
+}
+.reward-card .r-btn.can{background:var(--g500);color:#fff}
+.reward-card .r-btn.cant{background:#e5e7eb;color:#9ca3af}
+/* 游戏卡片 */
+.game-card{
+  background:var(--card);border-radius:var(--radius);padding:12px;
+  margin-bottom:6px;box-shadow:var(--shadow);cursor:pointer;
+  transition:all .15s;display:flex;align-items:center;gap:10px;
+}
+.game-card:active{transform:scale(.97)}
+.game-card .g-icon{
+  width:40px;height:40px;border-radius:11px;
+  display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;
+}
+.game-card .g-icon.cn{background:#fef3c7}.game-card .g-icon.ma{background:#dbeafe}
+.game-card .g-icon.en{background:#fce7f3}.game-card .g-icon.sc{background:#e0f2fe}
+.game-card .g-info{flex:1}
+.game-card .g-name{font-size:13px;font-weight:600}
+.game-card .g-desc{font-size:10px;color:var(--tl)}
+/* 模态 */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:200;
+  display:flex;align-items:center;justify-content:center;padding:18px;
+  animation:fadeIn .2s;
+}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{
+  background:#fff;border-radius:16px;padding:18px;width:100%;
+  max-width:340px;max-height:80vh;overflow-y:auto;
+  animation:slideUp .22s;
+}
+@keyframes slideUp{from{transform:translateY(25px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal h3{font-size:16px;margin-bottom:12px}
+.modal .fg{margin-bottom:10px}
+.modal label{font-size:12px;font-weight:600;display:block;margin-bottom:3px;color:var(--tl)}
+.modal input,.modal select{
+  width:100%;padding:9px 10px;border:1.5px solid #e5e7eb;border-radius:9px;
+  font-size:13px;outline:none;transition:border-color .15s;
+}
+.modal input:focus,.modal select:focus{border-color:var(--g400)}
+.modal .btn-row{display:flex;gap:8px;margin-top:14px}
+.modal .btn{
+  flex:1;padding:9px;border-radius:9px;font-size:13px;font-weight:600;
+  border:none;cursor:pointer;transition:all .15s;
+}
+.modal .btn-pri{background:var(--g500);color:#fff}
+.modal .btn-can{background:#f3f4f6;color:#6b7280}
+/* 游戏弹窗 */
+.gm-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;
+  display:flex;align-items:center;justify-content:center;padding:14px;
+}
+.gm-box{
+  background:#fff;border-radius:16px;width:100%;max-width:380px;
+  max-height:85vh;overflow-y:auto;padding:18px;
+}
+.gm-box h3{font-size:17px;text-align:center;margin-bottom:3px}
+.gm-box .gm-score{text-align:center;font-size:13px;color:var(--g600);font-weight:600;margin-bottom:10px}
+.gm-box .question{font-size:21px;text-align:center;font-weight:700;margin:14px 0}
+.gm-box .options{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.gm-box .option{
+  padding:13px;border-radius:11px;border:2px solid #e5e7eb;
+  text-align:center;font-size:14px;font-weight:600;cursor:pointer;transition:all .15s;
+}
+.gm-box .option:active{transform:scale(.95)}
+.gm-box .option.correct{background:var(--g100);border-color:var(--g500)}
+.gm-box .option.wrong{background:#fef2f2;border-color:#ef4444}
+.gm-box .gm-close{
+  display:block;margin:12px auto 0;padding:9px 26px;
+  background:var(--g500);color:#fff;border:none;border-radius:18px;
+  font-size:13px;font-weight:600;cursor:pointer;
+}
+/* 抓大鹅 */
+.goose-area{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:10px 0}
+.goose-card{
+  aspect-ratio:1;border-radius:11px;display:flex;align-items:center;
+  justify-content:center;font-size:24px;cursor:pointer;transition:all .15s;
+  border:2px solid #e5e7eb;background:#f9fafb;position:relative;
+}
+.goose-card.selected{border-color:var(--g500);background:var(--g100);transform:scale(.9)}
+.goose-card.matched{border-color:var(--g400);background:var(--g200);animation:pop .3s}
+@keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.12)}100%{transform:scale(1)}}
+.goose-target{
+  text-align:center;font-size:14px;font-weight:700;margin-bottom:6px;color:var(--g700);
+}
+.goose-target .tw{font-size:26px;display:block;margin-top:2px}
+/* 诗词 */
+.poem-box{
+  background:var(--card);border-radius:var(--radius);padding:14px;
+  box-shadow:var(--shadow);text-align:center;margin-bottom:6px;
+}
+.poem-box .pt{font-size:15px;font-weight:700;color:var(--g700)}
+.poem-box .pa{font-size:11px;color:var(--tl);margin:3px 0 8px}
+.poem-box .pl{font-size:14px;line-height:2}
+/* 作文提示 */
+.essay-box{
+  background:linear-gradient(135deg,#fef3c7,#fef9c3);border-radius:var(--radius);
+  padding:12px 14px;margin-bottom:6px;box-shadow:var(--shadow);
+}
+.essay-box .et{font-size:13px;font-weight:700;color:#92400e;margin-bottom:4px}
+.essay-box .ed{font-size:12px;color:#a16207;line-height:1.7}
+/* 底部状态栏 */
+.bottom-bar{
+  position:fixed;bottom:0;left:var(--nav-w);right:0;
+  background:#fff;border-top:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-around;
+  padding:7px 0;padding-bottom:var(--safe-b);z-index:99;
+}
+.bottom-bar .stat{text-align:center;font-size:10px;color:var(--tl)}
+.bottom-bar .stat .val{font-size:15px;font-weight:700;color:var(--g700)}
+/* Toast */
+.toast{
+  position:fixed;top:16px;left:50%;transform:translateX(-50%);
+  background:var(--g800);color:#fff;padding:9px 20px;border-radius:18px;
+  font-size:13px;font-weight:600;z-index:300;
+  animation:toastIn .25s,toastOut .25s 1.5s forwards;
+}
+@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(-8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+@keyframes toastOut{from{opacity:1}to{opacity:0}}
+/* 响应式居中 */
+@media(min-width:500px){body{justify-content:center}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">暑</div>
+  <div class="nav-items" id="navItems"></div>
+  <div class="nav-add" onclick="showAddModal()" title="添加任务">+</div>
+</nav>
+
+<main id="mainContent"></main>
+
+<div class="bottom-bar" id="bottomBar">
+  <div class="stat"><div class="val" id="statDone">0</div>今日完成</div>
+  <div class="stat"><div class="val" id="statTotal">0</div>总任务</div>
+  <div class="stat"><div class="val" id="statScore">0</div>积分</div>
+  <div class="stat"><div class="val" id="statStreak">0</div>连续天数</div>
+</div>
+
+<div id="toastContainer"></div>
+
+<!-- 新增任务弹窗 -->
+<div class="modal-overlay" id="addModal" style="display:none">
+  <div class="modal">
+    <h3>➕ 新增任务</h3>
+    <div class="fg"><label>任务名称</label><input id="addName" placeholder="输入任务名称"></div>
+    <div class="fg"><label>所属分类</label><select id="addCategory"></select></div>
+    <div class="fg"><label>积分奖励</label><input id="addPoints" type="number" value="10" min="0"></div>
+    <div class="btn-row">
+      <button class="btn btn-can" onclick="closeAddModal()">取消</button>
+      <button class="btn btn-pri" onclick="addTask()">确认添加</button>
+    </div>
+  </div>
+</div>
+
+<!-- 游戏弹窗 -->
+<div class="gm-overlay" id="gameModal" style="display:none">
+  <div class="gm-box" id="gameBox"></div>
+</div>
+
+<script>
+// ============ 数据层 ============
+const STORAGE_KEY = 'summer_wkv3';
+
+const poems = [
+  {title:'望庐山瀑布',author:'李白',lines:'日照香炉生紫烟，\n遥看瀑布挂前川。\n飞流直下三千尺，\n疑是银河落九天。'},
+  {title:'绝句',author:'杜甫',lines:'两个黄鹂鸣翠柳，\n一行白鹭上青天。\n窗含西岭千秋雪，\n门泊东吴万里船。'},
+  {title:'山行',author:'杜牧',lines:'远上寒山石径斜，\n白云生处有人家。\n停车坐爱枫林晚，\n霜叶红于二月花。'},
+  {title:'饮湖上初晴后雨',author:'苏轼',lines:'水光潋滟晴方好，\n山色空蒙雨亦奇。\n欲把西湖比西子，\n淡妆浓抹总相宜。'},
+  {title:'题西林壁',author:'苏轼',lines:'横看成岭侧成峰，\n远近高低各不同。\n不识庐山真面目，\n只缘身在此山中。'},
+  {title:'示儿',author:'陆游',lines:'死去元知万事空，\n但悲不见九州同。\n王师北定中原日，\n家祭无忘告乃翁。'},
+  {title:'泊船瓜洲',author:'王安石',lines:'京口瓜洲一水间，\n钟山只隔数重山。\n春风又绿江南岸，\n明月何时照我还。'},
+  {title:'元日',author:'王安石',lines:'爆竹声中一岁除，\n春风送暖入屠苏。\n千门万户曈曈日，\n总把新桃换旧符。'},
+  {title:'六月二十七日望湖楼醉书',author:'苏轼',lines:'黑云翻墨未遮山，\n白雨跳珠乱入船。\n卷地风来忽吹散，\n望湖楼下水如天。'},
+  {title:'惠崇春江晚景',author:'苏轼',lines:'竹外桃花三两枝，\n春江水暖鸭先知。\n蒌蒿满地芦芽短，\n正是河豚欲上时。'},
+  {title:'三衢道中',author:'曾几',lines:'梅子黄时日日晴，\n小溪泛尽却山行。\n绿阴不减来时路，\n添得黄鹂四五声。'},
+  {title:'忆江南',author:'白居易',lines:'江南好，风景旧曾谙。\n日出江花红胜火，\n春来江水绿如蓝。\n能不忆江南？'},
+  {title:'滁州西涧',author:'韦应物',lines:'独怜幽草涧边生，\n上有黄鹂深树鸣。\n春潮带雨晚来急，\n野渡无人舟自横。'},
+  {title:'大林寺桃花',author:'白居易',lines:'人间四月芳菲尽，\n山寺桃花始盛开。\n长恨春归无觅处，\n不知转入此中来。'},
+  {title:'浪淘沙',author:'刘禹锡',lines:'九曲黄河万里沙，\n浪淘风簸自天涯。\n如今直上银河去，\n同到牵牛织女家。'},
+  {title:'江南春',author:'杜牧',lines:'千里莺啼绿映红，\n水村山郭酒旗风。\n南朝四百八十寺，\n多少楼台烟雨中。'},
+  {title:'书湖阴先生壁',author:'王安石',lines:'茅檐长扫净无苔，\n花木成畦手自栽。\n一水护田将绿绕，\n两山排闼送青来。'},
+  {title:'观书有感',author:'朱熹',lines:'半亩方塘一鉴开，\n天光云影共徘徊。\n问渠那得清如许？\n为有源头活水来。'},
+  {title:'墨梅',author:'王冕',lines:'吾家洗砚池头树，\n朵朵花开淡墨痕。\n不要人夸好颜色，\n只留清气满乾坤。'},
+  {title:'石灰吟',author:'于谦',lines:'千锤万凿出深山，\n烈火焚烧若等闲。\n粉骨碎身浑不怕，\n要留清白在人间。'},
+  {title:'竹石',author:'郑燮',lines:'咬定青山不放松，\n立根原在破岩中。\n千磨万击还坚劲，\n任尔东西南北风。'},
+  {title:'村居',author:'高鼎',lines:'草长莺飞二月天，\n拂堤杨柳醉春烟。\n儿童散学归来早，\n忙趁东风放纸鸢。'},
+  {title:'所见',author:'袁枚',lines:'牧童骑黄牛，\n歌声振林樾。\n意欲捕鸣蝉，\n忽然闭口立。'},
+  {title:'己亥杂诗',author:'龚自珍',lines:'九州生气恃风雷，\n万马齐喑究可哀。\n我劝天公重抖擞，\n不拘一格降人材。'},
+];
+
+// 每周作文题目
+const essayTopics = [
+  '《暑假里最难忘的一件事》——写一件假期中让你印象最深的事，不少于400字。',
+  '《我的梦想》——你的梦想是什么？为什么有这个梦想？你将如何实现它？',
+  '《我最敬佩的人》——写一位你敬佩的人，通过具体事例说明原因。',
+  '《美丽的___》——描写一处你喜欢的风景，运用比喻、拟人等修辞手法。',
+  '《读___有感》——选一本你最近读的书，写一篇读后感。',
+  '《假如我是___》——展开想象，假如你变成了另一个人或物，会发生什么？',
+  '《二十年后的家乡》——想象二十年后家乡的变化，写出你的期待。',
+  '《给老师的一封信》——用书信格式，向老师说说你的心里话。',
+];
+
+const englishWords = [
+  {en:'apple',zh:'苹果',emoji:'🍎'},{en:'banana',zh:'香蕉',emoji:'🍌'},
+  {en:'cat',zh:'猫',emoji:'🐱'},{en:'dog',zh:'狗',emoji:'🐶'},
+  {en:'elephant',zh:'大象',emoji:'🐘'},{en:'fish',zh:'鱼',emoji:'🐟'},
+  {en:'grape',zh:'葡萄',emoji:'🍇'},{en:'house',zh:'房子',emoji:'🏠'},
+  {en:'ice cream',zh:'冰淇淋',emoji:'🍦'},{en:'juice',zh:'果汁',emoji:'🧃'},
+  {en:'kite',zh:'风筝',emoji:'🪁'},{en:'lion',zh:'狮子',emoji:'🦁'},
+  {en:'moon',zh:'月亮',emoji:'🌙'},{en:'nose',zh:'鼻子',emoji:'👃'},
+  {en:'orange',zh:'橙子',emoji:'🍊'},{en:'panda',zh:'熊猫',emoji:'🐼'},
+  {en:'queen',zh:'女王',emoji:'👸'},{en:'rabbit',zh:'兔子',emoji:'🐰'},
+  {en:'sun',zh:'太阳',emoji:'☀️'},{en:'tree',zh:'树',emoji:'🌳'},
+  {en:'umbrella',zh:'雨伞',emoji:'☂️'},{en:'violin',zh:'小提琴',emoji:'🎻'},
+  {en:'water',zh:'水',emoji:'💧'},{en:'star',zh:'星星',emoji:'⭐'},
+  {en:'book',zh:'书',emoji:'📖'},{en:'car',zh:'汽车',emoji:'🚗'},
+  {en:'flower',zh:'花',emoji:'🌸'},{en:'mountain',zh:'山',emoji:'⛰️'},
+  {en:'river',zh:'河流',emoji:'🏞️'},{en:'bird',zh:'鸟',emoji:'🐦'},
+];
+
+const scienceFacts = [
+  '🐝 蜜蜂采蜜时每秒翅膀振动约200次，一天能飞行约800公里。',
+  '🌍 地球赤道线速度高达每秒465米！比高铁快得多。',
+  '⚡ 闪电温度可达3万摄氏度，是太阳表面温度的5倍。',
+  '🦷 鲨鱼一生可换掉超过3万颗牙齿。',
+  '🐙 章鱼有三颗心脏，血液是蓝色的。',
+  '🌙 月球正以每年约3.8厘米的速度远离地球。',
+  '🦋 蝴蝶用脚来品尝味道，味觉感受器在足部。',
+  '💡 太阳光到达地球需约8分20秒。',
+  '🐜 蚂蚁能举起自身体重50倍的物体。',
+  '🌋 地球上约有1500座活火山。',
+  '🧊 冰山露出水面的部分只占整体的10%。',
+  '🦒 长颈鹿的舌头可长到50厘米，用来清洁耳朵。',
+  '🐬 海豚睡觉时只让一半大脑休息。',
+  '🌲 一棵成年橡树一天可吸收约200升水。',
+  '🦉 猫头鹰脖子可旋转270度。',
+  '🎋 竹子一天可长高约1米，是世界上生长最快的植物。',
+  '🦩 火烈鸟吃含胡萝卜素的藻类，所以羽毛是粉红色。',
+  '🌪️ 龙卷风中心气压极低，可使建筑物从内部"爆炸"。',
+  '🐧 帝企鹅可潜入水下500多米，憋气超20分钟。',
+  '🦎 壁虎脚上有数百万根纳米级绒毛，所以能在墙上爬行。',
+  '🌈 彩虹永远是圆形的，只是从地面只能看到半圆。',
+  '🦴 人体共有206块骨头，其中超过一半在手脚。',
+  '🌻 向日葵白天跟着太阳转，这种现象叫向光性。',
+  '🕷️ 蜘蛛丝比同等重量的钢铁还强韧5倍。',
+];
+
+const defaultCategories = [
+  {
+    id:'chinese',name:'语文',icon:'📖',
+    tasks:[
+      {id:'c1',name:'背诵一首古诗',pts:10},
+      {id:'c2',name:'每周一篇作文',pts:10,type:'weekly'},
+      {id:'c3',name:'习题本2页',pts:10},
+      {id:'c4',name:'五升六练习本2页',pts:10},
+      {id:'c5',name:'绘本故事和阅读',pts:10},
+    ]
+  },
+  {
+    id:'math',name:'数学',icon:'🔢',
+    tasks:[
+      {id:'m1',name:'计算题一页',pts:10},
+      {id:'m2',name:'题优练习题',pts:10},
+      {id:'m3',name:'五升六练习题',pts:10},
+      {id:'m4',name:'错题复习集',pts:10},
+    ]
+  },
+  {
+    id:'english',name:'英语',icon:'🔤',
+    tasks:[
+      {id:'e1',name:'练习册2页',pts:10},
+      {id:'e2',name:'听力一页',pts:10},
+      {id:'e3',name:'单词本',pts:10},
+    ]
+  },
+  {
+    id:'science',name:'科学',icon:'🔬',
+    tasks:[
+      {id:'sc1',name:'阳光同学每天2页',pts:10},
+      {id:'sc2',name:'每日一科普',pts:10},
+    ]
+  },
+  {
+    id:'sport',name:'运动',icon:'🏃',
+    tasks:[
+      {id:'s1',name:'跳绳2分钟200个',pts:10},
+      {id:'s2',name:'傍晚散步30分钟以上',pts:10},
+    ]
+  },
+  {
+    id:'violin',name:'小提琴',icon:'🎻',
+    tasks:[
+      {id:'v1',name:'小提琴练习至少20分钟',pts:10},
+    ]
+  },
+  {
+    id:'chore',name:'家务',icon:'🧹',
+    tasks:[
+      {id:'h1',name:'洗碗',pts:10},
+      {id:'h2',name:'整理玩具',pts:10},
+      {id:'h3',name:'洗衣服（每件）',pts:10},
+      {id:'h4',name:'拖地',pts:20},
+    ]
+  },
+  {
+    id:'fun',name:'娱乐',icon:'🎮',
+    tasks:[]
+  },
+  {
+    id:'rewards',name:'奖励',icon:'🎁',
+    tasks:[]
+  },
+];
+
+const rewards = [
+  {id:'r1',name:'看电视20分钟',cost:50,icon:'📺'},
+  {id:'r2',name:'去公园一次',cost:50,icon:'🌳'},
+  {id:'r3',name:'吃一次冰淇淋',cost:50,icon:'🍦'},
+  {id:'r4',name:'吃一次汉堡',cost:100,icon:'🍔'},
+];
+
+// ============ 状态 ============
+let state = loadState();
+let currentNav = 'chinese';
+
+function getToday(){return new Date().toISOString().split('T')[0]}
+function getWeekKey(){
+  const d=new Date(),start=new Date(d.getFullYear(),0,1);
+  return Math.ceil(((d-start)/86400000+start.getDay()+1)/7);
+}
+
+function loadState(){
+  try{
+    const raw=localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      const s=JSON.parse(raw);
+      defaultCategories.forEach(dc=>{
+        if(!s.categories[dc.id]) s.categories[dc.id]={tasks:dc.tasks.map(t=>({...t}))};
+      });
+      return s;
+    }
+  }catch(e){}
+  return initState();
+}
+
+function initState(){
+  const cats={};
+  defaultCategories.forEach(dc=>{cats[dc.id]={tasks:dc.tasks.map(t=>({...t,id:t.id||genId()}))};});
+  return{
+    categories:cats,completed:{},totalScore:0,
+    today:getToday(),poemIndex:0,scienceIndex:0,essayIndex:0,
+  };
+}
+
+function saveState(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state))}
+function genId(){return 't'+Date.now()+'_'+Math.random().toString(36).slice(2,6)}
+
+function ensureToday(){
+  if(state.today!==getToday()){
+    state.today=getToday();
+    state.poemIndex=(state.poemIndex+1)%poems.length;
+    state.scienceIndex=(state.scienceIndex+1)%scienceFacts.length;
+    // 每周一更换作文题目
+    const d=new Date();
+    if(d.getDay()===1) state.essayIndex=(state.essayIndex+1)%essayTopics.length;
+    saveState();
+  }
+}
+
+function getTodayCompleted(){return state.completed[state.today]||{}}
+
+function toggleTask(taskId){
+  ensureToday();
+  if(!state.completed[state.today])state.completed[state.today]={};
+  const wasDone=state.completed[state.today][taskId];
+  if(wasDone){
+    delete state.completed[state.today][taskId];
+    let pts=10;
+    for(const cat of Object.values(state.categories)){
+      const t=cat.tasks.find(t=>t.id===taskId);
+      if(t){pts=t.pts||10;break;}
+    }
+    state.totalScore=Math.max(0,(state.totalScore||0)-pts);
+  }else{
+    state.completed[state.today][taskId]=true;
+    let pts=10;
+    for(const cat of Object.values(state.categories)){
+      const t=cat.tasks.find(t=>t.id===taskId);
+      if(t){pts=t.pts||10;break;}
+    }
+    state.totalScore=(state.totalScore||0)+pts;
+  }
+  saveState();render();
+  if(!wasDone)showToast('✅ 打卡成功！+'+getTaskPts(taskId)+'积分');
+}
+
+function getTaskPts(taskId){
+  for(const cat of Object.values(state.categories)){
+    const t=cat.tasks.find(t=>t.id===taskId);
+    if(t)return t.pts||10;
+  }
+  return 10;
+}
+
+function deleteTask(taskId){
+  for(const catId of Object.keys(state.categories)){
+    state.categories[catId].tasks=state.categories[catId].tasks.filter(t=>t.id!==taskId);
+  }
+  saveState();render();showToast('🗑️ 任务已删除');
+}
+
+function addTask(){
+  const name=document.getElementById('addName').value.trim();
+  const category=document.getElementById('addCategory').value;
+  const pts=parseInt(document.getElementById('addPoints').value)||10;
+  if(!name){showToast('请输入任务名称');return;}
+  if(!state.categories[category])state.categories[category]={tasks:[]};
+  state.categories[category].tasks.push({id:genId(),name,pts,type:'daily'});
+  saveState();closeAddModal();switchNav(category);render();showToast('✅ 任务已添加');
+}
+
+function redeemReward(rewardId){
+  const reward=rewards.find(r=>r.id===rewardId);
+  if(!reward)return;
+  if((state.totalScore||0)<reward.cost){showToast('😅 积分不足，继续加油！');return;}
+  state.totalScore-=reward.cost;
+  saveState();render();showToast('🎉 兑换成功：'+reward.name+'！');
+}
+
+// ============ 渲染 ============
+function render(){ensureToday();renderNav();renderContent();renderBottomBar();}
+
+function renderNav(){
+  const container=document.getElementById('navItems');
+  container.innerHTML=Object.entries(state.categories).map(([id])=>{
+    const dc=defaultCategories.find(d=>d.id===id);
+    const icon=dc?dc.icon:'📋';const name=dc?dc.name:id;
+    return `<div class="nav-item ${currentNav===id?'active':''}" onclick="switchNav('${id}')"><span class="ic">${icon}</span>${name}</div>`;
+  }).join('');
+}
+
+function switchNav(id){currentNav=id;render();}
+
+function renderContent(){
+  const main=document.getElementById('mainContent');
+  const completed=getTodayCompleted();
+  if(currentNav==='fun'){main.innerHTML=renderGames();return;}
+  if(currentNav==='rewards'){main.innerHTML=renderRewards();return;}
+  main.innerHTML=renderTaskSection(currentNav,completed);
+}
+
+function renderHeader(){
+  const d=new Date();
+  const weekDays=['日','一','二','三','四','五','六'];
+  const dateStr=`${d.getMonth()+1}月${d.getDate()}日 星期${weekDays[d.getDay()]}`;
+  return `<div class="header"><div><div class="greeting">🌞 暑假工作台</div><div style="font-size:11px;color:var(--tl)">${dateStr}</div></div><div class="score-badge"><span>⭐</span> ${state.totalScore||0}分</div></div>`;
+}
+
+function renderTaskSection(catId,completed){
+  const cat=state.categories[catId];
+  const dc=defaultCategories.find(d=>d.id===catId);
+  const catName=dc?dc.name:catId;const catIcon=dc?dc.icon:'📋';
+  let html=renderHeader();
+
+  // 语文：显示古诗 + 作文
+  if(catId==='chinese'){
+    const poem=poems[state.poemIndex%poems.length];
+    html+=`<div class="poem-box"><div class="pt">📜 ${poem.title}</div><div class="pa">—— ${poem.author}</div><div class="pl">${poem.lines.replace(/\n/g,'<br>')}</div><div style="font-size:10px;color:var(--tl);margin-top:6px">📅 今日背诵古诗</div></div>`;
+    const essay=essayTopics[state.essayIndex%essayTopics.length];
+    html+=`<div class="essay-box"><div class="et">✏️ 本周作文</div><div class="ed">${essay}</div></div>`;
+  }
+
+  // 科学：显示科普
+  if(catId==='science'){
+    const fact=scienceFacts[state.scienceIndex%scienceFacts.length];
+    html+=`<div class="poem-box" style="text-align:left"><div style="font-size:13px;line-height:1.7">${fact}</div></div>`;
+  }
+
+  html+=`<div class="sec-tit">${catIcon} ${catName} · 每日任务</div>`;
+  const tasks=cat.tasks||[];
+  if(tasks.length===0){
+    html+=`<div style="text-align:center;padding:28px;color:var(--tl)">暂无任务，点击左下角 + 添加</div>`;
+  }else{
+    tasks.forEach(t=>{
+      const done=!!completed[t.id];
+      const meta=t.type==='weekly'?'每周任务':'每日任务';
+      html+=`<div class="task-card ${done?'done':''}" onclick="toggleTask('${t.id}')"><div class="check">✓</div><div class="task-info"><div class="task-name">${t.name}</div><div class="task-meta">${meta}</div></div><div class="task-pts">+${t.pts||10}分</div><div class="task-del" onclick="event.stopPropagation();deleteTask('${t.id}')">✕</div></div>`;
+    });
+  }
+  return html;
+}
+
+function renderGames(){
+  let html=renderHeader();
+  html+=`<div class="sec-tit">🎮 娱乐小游戏</div>`;
+  html+=`<div class="game-card" onclick="startChineseGame()"><div class="g-icon cn">📖</div><div class="g-info"><div class="g-name">语文 · 古诗填空</div><div class="g-desc">根据上下文填写古诗空缺的字词</div></div></div>`;
+  html+=`<div class="game-card" onclick="startMathGame()"><div class="g-icon ma">🔢</div><div class="g-info"><div class="g-name">数学 · 速算挑战</div><div class="g-desc">加减乘除混合运算，看看你能对几题</div></div></div>`;
+  html+=`<div class="game-card" onclick="startScienceGame()"><div class="g-icon sc">🔬</div><div class="g-info"><div class="g-name">科学 · 知识问答</div><div class="g-desc">趣味科学知识选择题</div></div></div>`;
+  html+=`<div class="game-card" onclick="startEnglishGame()"><div class="g-icon en">🦆</div><div class="g-info"><div class="g-name">英语 · 抓大鹅</div><div class="g-desc">找到单词与实物对应的卡片配对消除</div></div></div>`;
+  html+=`<div style="text-align:center;padding:14px;font-size:11px;color:var(--tl)">⚠️ 娱乐游戏不计入积分</div>`;
+  return html;
+}
+
+function renderRewards(){
+  let html=renderHeader();
+  html+=`<div class="sec-tit">🎁 积分兑换奖励</div>`;
+  html+=`<div style="text-align:center;margin:6px 0;font-size:12px;color:var(--tl)">当前积分：<b style="color:var(--g600);font-size:17px">${state.totalScore||0}</b></div>`;
+  rewards.forEach(r=>{
+    const canBuy=(state.totalScore||0)>=r.cost;
+    html+=`<div class="reward-card ${canBuy?'affordable':'locked'}"><div class="r-icon">${r.icon}</div><div class="r-info"><div class="r-name">${r.name}</div><div class="r-cost">需要 ${r.cost} 积分</div></div><button class="r-btn ${canBuy?'can':'cant'}" onclick="event.stopPropagation();redeemReward('${r.id}')">${canBuy?'兑换':'不足'}</button></div>`;
+  });
+  return html;
+}
+
+function renderBottomBar(){
+  const completed=getTodayCompleted();
+  let doneCount=0,totalCount=0;
+  for(const cat of Object.values(state.categories)){
+    (cat.tasks||[]).forEach(t=>{totalCount++;if(completed[t.id])doneCount++;});
+  }
+  document.getElementById('statDone').textContent=doneCount;
+  document.getElementById('statTotal').textContent=totalCount;
+  document.getElementById('statScore').textContent=state.totalScore||0;
+  let streak=0;const d=new Date();
+  for(let i=0;i<365;i++){
+    const ds=d.toISOString().split('T')[0];
+    const comp=state.completed[ds];
+    if(comp&&Object.keys(comp).length>0){streak++;d.setDate(d.getDate()-1);}
+    else if(i===0){d.setDate(d.getDate()-1);}else break;
+  }
+  document.getElementById('statStreak').textContent=streak;
+}
+
+// ============ 游戏 ============
+let gameState={};
+
+const poemQuiz=[
+  {q:'日照香炉生___烟',a:'紫',opts:['紫','白','青','黄']},
+  {q:'遥看瀑布挂___川',a:'前',opts:['前','长','大','山']},
+  {q:'两个黄鹂鸣___柳',a:'翠',opts:['翠','绿','碧','青']},
+  {q:'一行白鹭上___天',a:'青',opts:['青','蓝','晴','碧']},
+  {q:'远上寒山石径___',a:'斜',opts:['斜','直','弯','窄']},
+  {q:'霜叶红于___月花',a:'二',opts:['二','三','四','五']},
+  {q:'春___水暖鸭先知',a:'江',opts:['江','河','湖','海']},
+  {q:'___看成岭侧成峰',a:'横',opts:['横','竖','远','近']},
+  {q:'只缘身在___山中',a:'此',opts:['此','高','深','大']},
+  {q:'___出江花红胜火',a:'日',opts:['日','月','星','云']},
+  {q:'春来江水绿如___',a:'蓝',opts:['蓝','绿','青','碧']},
+  {q:'千里莺啼___映红',a:'绿',opts:['绿','碧','翠','青']},
+];
+
+const scienceQuiz=[
+  {q:'蜜蜂采蜜时翅膀每秒振动约多少次？',a:'200次',opts:['200次','50次','500次','1000次']},
+  {q:'太阳光到达地球需要多长时间？',a:'约8分钟',opts:['约8分钟','约1秒','约1小时','约1天']},
+  {q:'章鱼有几颗心脏？',a:'3颗',opts:['3颗','1颗','2颗','4颗']},
+  {q:'鲨鱼一生可换掉约多少颗牙齿？',a:'3万颗',opts:['3万颗','30颗','300颗','3000颗']},
+  {q:'月球每年以多少速度远离地球？',a:'约3.8厘米',opts:['约3.8厘米','约1米','约1公里','约10米']},
+  {q:'蝴蝶用什么部位来品尝味道？',a:'脚',opts:['脚','嘴巴','翅膀','触角']},
+  {q:'蚂蚁能举起自身体重多少倍的物体？',a:'50倍',opts:['50倍','5倍','10倍','100倍']},
+  {q:'海豚睡觉时是怎样的？',a:'一半大脑休息',opts:['一半大脑休息','完全不睡','沉入海底','浮在水面']},
+  {q:'竹子一天能长多高？',a:'约1米',opts:['约1米','约10厘米','约5米','约1厘米']},
+  {q:'冰山露出水面的部分占多少？',a:'约10%',opts:['约10%','约50%','约90%','约30%']},
+];
+
+function startChineseGame(){
+  gameState={score:0,qi:0,questions:shuffle([...poemQuiz]).slice(0,8)};
+  showChineseQ();
+}
+function showChineseQ(){
+  const gs=gameState;
+  if(gs.qi>=gs.questions.length){
+    showGameEnd('📖 古诗填空',gs.score,gs.questions.length,gs.score>=6?'太棒了！古诗小达人！':gs.score>=4?'不错哦，继续加油！':'多背背古诗，下次更厉害！',startChineseGame);
+    return;
+  }
+  const q=gs.questions[gs.qi];
+  document.getElementById('gameBox').innerHTML=`<h3>📖 古诗填空</h3><div class="gm-score">第${gs.qi+1}/${gs.questions.length}题 · 得分：${gs.score}</div><div class="question">${q.q}</div><div class="options">${shuffle([...q.opts]).map(o=>`<div class="option" onclick="answerCQ('${o}')">${o}</div>`).join('')}</div>`;
+  document.getElementById('gameModal').style.display='flex';
+}
+function answerCQ(choice){
+  const q=gameState.questions[gameState.qi];
+  document.querySelectorAll('#gameBox .option').forEach(o=>{o.style.pointerEvents='none';if(o.textContent===q.a)o.classList.add('correct');if(o.textContent===choice&&choice!==q.a)o.classList.add('wrong');});
+  if(choice===q.a)gameState.score++;
+  gameState.qi++;setTimeout(showChineseQ,700);
+}
+
+function startMathGame(){
+  gameState={score:0,qi:0,total:10};
+  showMathQ();
+}
+function showMathQ(){
+  const gs=gameState;
+  if(gs.qi>=gs.total){
+    showGameEnd('🔢 速算挑战',gs.score,gs.total,gs.score>=8?'数学小天才！':gs.score>=5?'继续加油！':'多做练习会更好！',startMathGame);
+    return;
+  }
+  const ops=[()=>{const a=r(10,99),b=r(10,99);return{q:`${a} + ${b} = ?`,a:a+b};},()=>{const a=r(20,99),b=r(10,a);return{q:`${a} - ${b} = ?`,a:a-b};},()=>{const a=r(2,12),b=r(2,9);return{q:`${a} × ${b} = ?`,a:a*b};},()=>{const b=r(2,9);const a=b*r(2,12);return{q:`${a} ÷ ${b} = ?`,a:a/b};}];
+  const p=ops[r(0,3)]();gs._ans=p.a;
+  const wrongs=new Set([p.a]);
+  while(wrongs.size<4){const w=p.a+r(-15,15);if(w>0&&w!==p.a)wrongs.add(w);}
+  document.getElementById('gameBox').innerHTML=`<h3>🔢 速算挑战</h3><div class="gm-score">第${gs.qi+1}/${gs.total}题 · 得分：${gs.score}</div><div class="question">${p.q}</div><div class="options">${shuffle([...wrongs]).map(o=>`<div class="option" onclick="answerMQ(${o})">${o}</div>`).join('')}</div>`;
+  document.getElementById('gameModal').style.display='flex';
+}
+function answerMQ(choice){
+  const correct=gameState._ans;
+  document.querySelectorAll('#gameBox .option').forEach(o=>{o.style.pointerEvents='none';if(parseInt(o.textContent)===correct)o.classList.add('correct');if(parseInt(o.textContent)===choice&&choice!==correct)o.classList.add('wrong');});
+  if(choice===correct)gameState.score++;
+  gameState.qi++;setTimeout(showMathQ,700);
+}
+
+function startScienceGame(){
+  gameState={score:0,qi:0,questions:shuffle([...scienceQuiz]).slice(0,8)};
+  showScienceQ();
+}
+function showScienceQ(){
+  const gs=gameState;
+  if(gs.qi>=gs.questions.length){
+    showGameEnd('🔬 科学问答',gs.score,gs.questions.length,gs.score>=6?'科学小博士！':gs.score>=4?'不错哦！':'继续探索科学世界！',startScienceGame);
+    return;
+  }
+  const q=gs.questions[gs.qi];
+  document.getElementById('gameBox').innerHTML=`<h3>🔬 科学问答</h3><div class="gm-score">第${gs.qi+1}/${gs.questions.length}题 · 得分：${gs.score}</div><div class="question">${q.q}</div><div class="options">${shuffle([...q.opts]).map(o=>`<div class="option" onclick="answerSQ('${o}')">${o}</div>`).join('')}</div>`;
+  document.getElementById('gameModal').style.display='flex';
+}
+function answerSQ(choice){
+  const q=gameState.questions[gameState.qi];
+  document.querySelectorAll('#gameBox .option').forEach(o=>{o.style.pointerEvents='none';if(o.textContent===q.a)o.classList.add('correct');if(o.textContent===choice&&choice!==q.a)o.classList.add('wrong');});
+  if(choice===q.a)gameState.score++;
+  gameState.qi++;setTimeout(showScienceQ,700);
+}
+
+function showGameEnd(title,score,total,msg,restartFn){
+  const emoji=score>=total*.75?'🎉':score>=total*.5?'👍':'💪';
+  document.getElementById('gameBox').innerHTML=`<h3>${title}</h3><div class="gm-score">得分：${score} / ${total}</div><div style="text-align:center;font-size:42px;margin:16px">${emoji}</div><div style="text-align:center;font-size:13px;color:var(--tl)">${msg}</div><button class="gm-close" onclick="closeGame()">关闭</button><button class="gm-close" style="margin-left:6px;background:var(--g700)" onclick="${restartFn.name}()">再来一局</button>`;
+  document.getElementById('gameModal').style.display='flex';
+}
+
+// 抓大鹅
+function startEnglishGame(){
+  const pairs=shuffle([...englishWords]).slice(0,6);
+  const cards=[];
+  pairs.forEach(p=>{cards.push({type:'en',text:p.en,pid:p.en,emoji:''});cards.push({type:'zh',text:p.zh,pid:p.en,emoji:p.emoji});});
+  gameState={score:0,total:pairs.length,matched:0,cards:shuffle(cards),sel:null,mids:new Set()};
+  showGoose();
+}
+function showGoose(){
+  const gs=gameState;
+  const unmatched=gs.cards.filter(c=>!gs.mids.has(c.pid+c.type));
+  const target=unmatched.length>0?unmatched[r(0,unmatched.length-1)]:null;
+  let html=`<h3>🦆 抓大鹅 · 单词配对</h3><div class="gm-score">已配对：${gs.matched} / ${gs.total}</div>`;
+  if(target)html+=`<div class="goose-target">👆 请找到：<span class="tw">${target.type==='en'?target.text:target.emoji+' '+target.text}</span></div>`;
+  html+=`<div class="goose-area">`;
+  gs.cards.forEach((c,i)=>{
+    const m=gs.mids.has(c.pid+c.type),s=gs.sel===i;
+    let cls='goose-card';if(m)cls+=' matched';if(s)cls+=' selected';
+    const d=c.type==='en'?c.text:(c.emoji||c.text);
+    html+=`<div class="${cls}" onclick="selGoose(${i})" style="${m?'visibility:hidden':''}">${d}</div>`;
+  });
+  html+=`</div><button class="gm-close" onclick="closeGame()">关闭</button>`;
+  if(gs.matched>=gs.total){
+    html=`<h3>🦆 抓大鹅</h3><div style="text-align:center;font-size:44px;margin:16px">🎉</div><div style="text-align:center;font-size:15px;font-weight:700;color:var(--g600)">全部配对成功！单词小达人！</div><button class="gm-close" onclick="closeGame()">关闭</button><button class="gm-close" style="margin-left:6px;background:var(--g700)" onclick="startEnglishGame()">再来一局</button>`;
+  }
+  document.getElementById('gameBox').innerHTML=html;
+  document.getElementById('gameModal').style.display='flex';
+}
+function selGoose(i){
+  const gs=gameState,c=gs.cards[i];
+  if(gs.mids.has(c.pid+c.type))return;
+  if(gs.sel===null){gs.sel=i;showGoose();return;}
+  const prev=gs.cards[gs.sel];
+  if(gs.sel===i){gs.sel=null;showGoose();return;}
+  if(prev.pid===c.pid&&prev.type!==c.type){
+    gs.mids.add(prev.pid+prev.type);gs.mids.add(c.pid+c.type);gs.matched++;gs.sel=null;showGoose();
+  }else{
+    const ps=gs.sel;gs.sel=null;showGoose();
+    setTimeout(()=>{
+      const cards=document.querySelectorAll('.goose-card');
+      if(cards[ps])cards[ps].style.background='#fef2f2';
+      if(cards[i])cards[i].style.background='#fef2f2';
+      setTimeout(()=>{if(cards[ps])cards[ps].style.background='';if(cards[i])cards[i].style.background='';},350);
+    },80);
+  }
+}
+
+function closeGame(){document.getElementById('gameModal').style.display='none';gameState={};}
+
+// ============ 弹窗 ============
+function showAddModal(){
+  document.getElementById('addName').value='';
+  document.getElementById('addPoints').value='10';
+  const sel=document.getElementById('addCategory');
+  sel.innerHTML=Object.entries(state.categories).map(([id])=>{
+    const dc=defaultCategories.find(d=>d.id===id);
+    return `<option value="${id}">${dc?dc.icon+' '+dc.name:id}</option>`;
+  }).join('');
+  sel.value=currentNav;
+  document.getElementById('addModal').style.display='flex';
+}
+function closeAddModal(){document.getElementById('addModal').style.display='none';}
+document.addEventListener('click',function(e){
+  if(e.target.id==='addModal')closeAddModal();
+  if(e.target.id==='gameModal')closeGame();
+});
+
+// ============ 工具 ============
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function r(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
+function showToast(msg){
+  const container=document.getElementById('toastContainer');
+  const el=document.createElement('div');el.className='toast';el.textContent=msg;
+  container.appendChild(el);setTimeout(()=>el.remove(),2000);
+}
+
+// ============ 初始化 ============
+(function init(){
+  ensureToday();
+  if(state.poemIndex===undefined){state.poemIndex=new Date().getDate()%poems.length;saveState();}
+  if(state.essayIndex===undefined){state.essayIndex=new Date().getDate()%essayTopics.length;saveState();}
+  render();
+})();
+</script>
+</body>
+</html>
